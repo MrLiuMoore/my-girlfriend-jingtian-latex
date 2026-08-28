@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="《我的女友景甜》虚构文本知识图谱">
+  <link rel="icon" href="data:,">
+  <title>《我的女友景甜》叙事知识图谱</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3f2ee;
+      --panel: #fbfaf7;
+      --ink: #181817;
+      --muted: #6d6b65;
+      --line: #d8d5cd;
+      --accent: #b4232f;
+      --person: #b4232f;
+      --place: #087f78;
+      --org: #3366a8;
+      --object: #a86613;
+      --event: #7256a8;
+      --shadow: 0 12px 32px rgba(28, 27, 24, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-width: 320px;
+      height: 100%;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    button, input { font: inherit; }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(51, 102, 168, 0.28);
+      outline-offset: 2px;
+    }
+
+    .masthead {
+      min-height: 74px;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(251, 250, 247, 0.96);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .title-block { min-width: 0; }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Source Han Serif CN", "Songti SC", serif;
+      font-size: clamp(20px, 2.2vw, 30px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .fiction-note {
+      margin: 0;
+      max-width: 430px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      text-align: right;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr) 310px;
+    }
+
+    .controls,
+    .inspector {
+      min-width: 0;
+      overflow: auto;
+      background: var(--panel);
+      scrollbar-width: thin;
+    }
+
+    .controls {
+      padding: 18px;
+      border-right: 1px solid var(--line);
+    }
+
+    .inspector {
+      padding: 20px;
+      border-left: 1px solid var(--line);
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 22px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 11px 5px;
+      text-align: center;
+      border-right: 1px solid var(--line);
+    }
+
+    .stat:last-child { border-right: 0; }
+    .stat strong { display: block; font-size: 18px; }
+    .stat span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+
+    .search-wrap { position: relative; margin-bottom: 20px; }
+
+    .search-wrap input {
+      width: 100%;
+      height: 38px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .filters { display: grid; gap: 7px; margin-bottom: 22px; }
+
+    .filter-row {
+      min-height: 36px;
+      padding: 7px 9px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+    }
+
+    .filter-row:hover { border-color: var(--line); background: #fff; }
+    .filter-row input { width: 15px; height: 15px; margin: 0; accent-color: var(--ink); }
+    .filter-row span:last-child { margin-left: auto; color: var(--muted); font-size: 11px; }
+
+    .swatch { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .button:hover { border-color: #aaa69c; background: #f6f4ef; }
+    .button.active { border-color: var(--ink); background: var(--ink); color: #fff; }
+
+    .chapter-list {
+      display: grid;
+      gap: 0;
+      margin-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    .chapter-item {
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .chapter-item strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+    .graph-stage {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(rgba(24, 24, 23, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(24, 24, 23, 0.045) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    #graph { display: block; width: 100%; height: 100%; cursor: grab; }
+    #graph:active { cursor: grabbing; }
+    .link { stroke: #9b9992; stroke-opacity: 0.48; }
+    .link.is-muted { stroke-opacity: 0.07; }
+    .link.is-active { stroke: var(--accent); stroke-opacity: 0.88; }
+
+    .link-label {
+      fill: #5e5c57;
+      font-size: 9px;
+      text-anchor: middle;
+      paint-order: stroke;
+      stroke: var(--paper);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .link-label.is-visible { opacity: 1; }
+    .node { cursor: pointer; }
+    .node circle { stroke: #fff; stroke-width: 2px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.17)); }
+    .node.is-muted { opacity: 0.14; }
+    .node.is-active circle { stroke: var(--ink); stroke-width: 3px; }
+
+    .node-label {
+      fill: var(--ink);
+      font-size: 10px;
+      font-weight: 700;
+      text-anchor: middle;
+      paint-order: stroke;
+      stroke: var(--paper);
+      stroke-width: 5px;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .graph-caption {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      pointer-events: none;
+    }
+
+    .load-error {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 32px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .inspector-kicker {
+      margin: 0 0 7px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .inspector h2 {
+      margin: 0 0 10px;
+      font-family: "Source Han Serif CN", "Songti SC", serif;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .summary {
+      margin: 0 0 18px;
+      color: #4f4d48;
+      font-family: "Source Han Serif CN", "Songti SC", serif;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .meta-line {
+      margin: 0 0 18px;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .relations { display: grid; gap: 7px; }
+
+    .relation-button {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .relation-button:hover { border-color: #aaa69c; }
+    .relation-button strong { display: block; margin-bottom: 3px; font-size: 12px; }
+    .relation-button span { color: var(--muted); font-size: 10px; line-height: 1.45; }
+
+    .overview-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #4f4d48;
+      font-size: 13px;
+      line-height: 1.85;
+    }
+
+    .tooltip {
+      position: fixed;
+      z-index: 10;
+      max-width: 260px;
+      padding: 8px 10px;
+      border: 1px solid #3a3935;
+      border-radius: 4px;
+      background: #1d1d1b;
+      color: #fff;
+      font-size: 11px;
+      line-height: 1.5;
+      box-shadow: var(--shadow);
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(10px, 10px);
+    }
+
+    .tooltip.visible { opacity: 1; }
+
+    @media (max-width: 980px) {
+      html, body { height: auto; overflow: auto; }
+      body { display: block; }
+      .masthead { align-items: flex-start; }
+      .workspace { height: auto; grid-template-columns: 220px minmax(0, 1fr); }
+      .graph-stage { height: calc(100vh - 74px); min-height: 620px; }
+      .inspector { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
+    }
+
+    @media (max-width: 680px) {
+      .masthead { min-height: 0; padding: 12px 14px; display: block; }
+      .fiction-note { margin-top: 7px; max-width: none; text-align: left; }
+      .workspace { display: block; }
+      .controls { padding: 14px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .stats { margin-bottom: 12px; }
+      .filters { grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+      .chapter-list { display: none; }
+      .graph-stage { height: 68vh; min-height: 470px; }
+      .inspector { padding: 18px 14px 28px; }
+      .node-label { font-size: 9px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="title-block">
+      <p class="eyebrow">叙事知识图谱 / 6 CHAPTERS</p>
+      <h1>《我的女友景甜》知识图谱关系网络</h1>
+    </div>
+    <p class="fiction-note">本页仅分析Git仓库文本中的叙事关系，不代表现实人物经历或事实判断。</p>
+  </header>
+
+  <main class="workspace">
+    <aside class="controls" aria-label="图谱控制">
+      <p class="section-title">图谱规模</p>
+      <div class="stats">
+        <div class="stat"><strong id="node-count">0</strong><span>实体</span></div>
+        <div class="stat"><strong id="link-count">0</strong><span>关系</span></div>
+        <div class="stat"><strong>6</strong><span>章节</span></div>
+      </div>
+
+      <p class="section-title"><label for="entity-search">实体检索</label></p>
+      <div class="search-wrap">
+        <input id="entity-search" list="entity-options" type="search" placeholder="输入实体名称" autocomplete="off">
+        <datalist id="entity-options"></datalist>
+      </div>
+
+      <p class="section-title">实体类型</p>
+      <div class="filters" id="filters"></div>
+
+      <div class="actions">
+        <button class="button" id="fit-button" type="button">全图视野</button>
+        <button class="button" id="labels-button" type="button" aria-pressed="false">关系标签</button>
+      </div>
+
+      <div class="chapter-list" aria-label="叙事章节">
+        <div class="chapter-item"><strong>01</strong><span>海崖上的电话</span></div>
+        <div class="chapter-item"><strong>02</strong><span>没有通过的申请</span></div>
+        <div class="chapter-item"><strong>03</strong><span>第一面</span></div>
+        <div class="chapter-item"><strong>04</strong><span>大西洋航线</span></div>
+        <div class="chapter-item"><strong>05</strong><span>十一秒</span></div>
+        <div class="chapter-item"><strong>06</strong><span>什么都没有发生</span></div>
+      </div>
+    </aside>
+
+    <section class="graph-stage" aria-label="知识图谱可视化">
+      <svg id="graph" role="img" aria-label="《我的女友景甜》实体关系知识图谱"></svg>
+      <p class="graph-caption">数据来源：仓库 main.tex · 节点可拖拽，画布支持缩放</p>
+      <div class="load-error" id="load-error">D3.js 加载失败，请检查网络连接后刷新页面。</div>
+    </section>
+
+    <aside class="inspector" id="inspector" aria-live="polite">
+      <p class="inspector-kicker">图谱概览</p>
+      <h2>叙事关系总览</h2>
+      <p class="summary">图谱以孙宇晨与景甜为双中心，把人物关系、跨洲移动、资金行为、医疗计划和记忆物件连接在同一网络中。</p>
+      <div class="meta-line"><span>分析对象</span><strong>虚构文本</strong></div>
+      <ul class="overview-list">
+        <li>红色：人物</li>
+        <li>绿色：地点</li>
+        <li>蓝色：机构</li>
+        <li>金色：作品与物件</li>
+        <li>紫色：关键事件</li>
+      </ul>
+    </aside>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="tooltip"></div>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const errorBox = document.getElementById("load-error");
+      if (!window.d3) {
+        errorBox.style.display = "grid";
+        return;
+      }
+
+      const TYPES = {
+        "人物": { color: "#b4232f" },
+        "地点": { color: "#087f78" },
+        "机构": { color: "#3366a8" },
+        "作品/物件": { color: "#a86613" },
+        "事件": { color: "#7256a8" }
+      };
+
+      const N = (id, label, type, chapter, summary) => ({ id, label, type, chapter, summary });
+      const L = (source, target, relation, chapter, evidence) => ({ source, target, relation, chapter, evidence });
+
+      const rawNodes = [
+        N("sun", "孙宇晨", "人物", "全篇", "第一人称故事的中心人物；其回忆、资源调度与最终决定串联全部叙事。"),
+        N("jing", "景甜", "人物", "全篇", "另一中心人物；文本围绕她与孙宇晨的相识、旅行、生育计划和关系中断展开。"),
+        N("sunParents", "孙宇晨父母", "人物", "第四章", "在香港与景甜见面，并出现在春节家庭安排中。"),
+        N("jingGuoqing", "景国庆", "人物", "第三至四章", "文本写作景甜父亲，也是彩礼和婚事筹备资金的收款人之一。"),
+        N("tianXinai", "田心爱", "人物", "第三至四章", "文本写作景甜母亲，也是彩礼和婚事筹备资金的收款人之一。"),
+        N("assistants", "助理团队", "人物", "全篇", "负责酒店、航班、清场、房产、付款与善后，是资源执行网络的核心。"),
+        N("guards", "保镖团队", "人物", "第三至四章", "参与电影院清场和旅行期间的安保。"),
+        N("crew", "飞行机组", "人物", "第一、四章", "负责湾流 G700 和 A330 等飞行任务。"),
+        N("cleaners", "酒店清洁人员", "人物", "第一、六章", "在无人入住或人物离开后仍按登记与流程继续工作。"),
+        N("oldFinance", "旧财务", "人物", "第四章", "景甜提到的旧合作人员，出狱后向她寻求资金。"),
+        N("surrogate", "代孕者", "人物", "第六章", "代孕机构预先选定的加州候选人，三十四岁，有两次生育经历。"),
+        N("filmGroup", "影视合作名单", "人物", "第二章", "对《战国》《长城》相关导演与演员名单的聚合节点。"),
+
+        N("beijing", "北京", "地点", "第二、四章", "北大回忆、生育检查以及多次邀请前往的城市。"),
+        N("hongkong", "香港", "地点", "第三至六章", "初见、相处、家庭会面、春节与最终等待发生的主要城市。"),
+        N("victoria", "维多利亚港", "地点", "第四至六章", "春节烟花、夜晚沉默与结尾空场景的重要空间意象。"),
+        N("usa", "美国", "地点", "第二章", "孙宇晨读书、创业经历的地点。"),
+        N("shanghai", "上海", "地点", "第三章", "调查材料中记录景甜购置房产的城市。"),
+        N("tenerife", "特纳里费", "地点", "第四、六章", "大西洋旅行第一站，也是酒店玻璃赔偿事件发生地。"),
+        N("teide", "泰德公园", "地点", "第四章", "二人观看日落与星空、谈论愿望的地点。"),
+        N("maldives", "马尔代夫", "地点", "第四章", "旅行第二站，关系、求婚和生育计划集中展开。"),
+        N("male", "马累", "地点", "第四章", "助理购买求婚戒指的中转地。"),
+        N("losangeles", "洛杉矶", "地点", "第一、四至六章", "取卵计划、诊所与促排针相关事件所在地区。"),
+        N("laguna", "拉古纳海滩", "地点", "第一、五章", "蒙太奇酒店和五千万美元电话所在的海岸地区。"),
+        N("pacific", "太平洋", "地点", "第一章", "拉古纳海滩酒店下方的海洋，也是电话背景声来源。"),
+        N("vannuys", "Van Nuys", "地点", "第一章", "湾流 G700 等待期间停放的机场区域。"),
+        N("hainan", "海南", "地点", "第四章", "景甜父母春节安排的地点。"),
+        N("delingha", "青海德令哈", "地点", "第四章", "景甜在特纳里费日落时提及，触发孙宇晨故乡联想。"),
+        N("atlantic", "大西洋", "地点", "第四、六章", "特纳里费面向的海洋，也是跨洲旅行的空间背景。"),
+
+        N("pku", "北京大学", "机构", "第二章", "孙宇晨 2007 年入学的学校。"),
+        N("qq", "QQ", "机构", "第二、四章", "景甜代言弹窗图片最初出现的平台。"),
+        N("xiaonei", "校内网", "机构", "第二章", "孙宇晨向景甜发送好友申请的平台。"),
+        N("rosewood", "瑰丽酒店", "机构", "第三章", "孙宇晨与景甜第一次正式见面的场所。"),
+        N("cinema", "电影院", "机构", "第三章", "为二人观看电影而完成全场清场的场所。"),
+        N("ritz", "丽兹卡尔顿", "机构", "第四、六章", "特纳里费住宿地，房间遮光胶带最终造成玻璃更换。"),
+        N("soneva", "索尼娃贾尼", "机构", "第四章", "马尔代夫住宿与求婚发生地。"),
+        N("clinic", "洛杉矶诊所", "机构", "第一、五至六章", "取卵计划执行方，后来寄回未使用的促排针。"),
+        N("agency", "代孕机构", "机构", "第四、六章", "收取定金并预先确定代孕候选人。"),
+
+        N("warring", "《战国》", "作品/物件", "第二章", "文本提到的 2011 年影视项目。"),
+        N("greatwall", "《长城》", "作品/物件", "第二章", "文本提到的后续大型影视项目。"),
+        N("zootopia", "《疯狂动物城2》", "作品/物件", "第三章", "二人在清场后的电影院观看的影片。"),
+        N("banana", "《喜剧演员》香蕉", "作品/物件", "第三章", "卡特兰作品，初见时引出价格与腐烂的对话。"),
+        N("qqImage", "2007 年 QQ 图片", "作品/物件", "第二、四、六章", "孙宇晨跨设备保存的景甜代言图片，贯穿相识前后。"),
+        N("report", "四十几页调查材料", "作品/物件", "第三、六章", "记录项目、合作方、公司股权、关联账户和房产的材料。"),
+        N("nailFile", "指甲锉", "作品/物件", "第三、六章", "景甜为孙宇晨磨指甲时使用，结尾成为遗留物。"),
+        N("claude", "Claude Code", "作品/物件", "第五章", "被用于分析现金资产并对五千万美元要求给出明确建议。"),
+        N("g700", "湾流 G700", "作品/物件", "第一、四章", "往返香港与洛杉矶、停放在 Van Nuys 的公务机。"),
+        N("a330", "A330", "作品/物件", "第四、六章", "三十人跨洲旅行使用的宽体客机。"),
+        N("seaplane", "水上飞机", "作品/物件", "第四章", "马尔代夫人员、行李和戒指运输工具。"),
+        N("house", "香港房产", "作品/物件", "第四章", "景甜要求购买并写在她名下的住宅。"),
+        N("meds", "未拆促排针", "作品/物件", "第六章", "洛杉矶诊所寄回的八天用量冷藏药物。"),
+
+        N("friendRequest", "2007 年好友申请", "事件", "第二章", "孙宇晨在校内网发送“你好”，申请没有通过。"),
+        N("firstMeeting", "瑰丽酒店初见", "事件", "第三章", "十九年后两位中心人物第一次正式见面。"),
+        N("privateScreening", "私人包场", "事件", "第三章", "助理买下座位并补偿已有观众，最终只留两人观影。"),
+        N("atlanticTrip", "大西洋行程", "事件", "第四章", "从香港到特纳里费，再前往马尔代夫的跨洲旅程。"),
+        N("bridePrice", "彩礼转账", "事件", "第四章", "三千万元人民币转入景国庆、田心爱账户。"),
+        N("proposal", "索尼娃贾尼求婚", "事件", "第四章", "2026 年 1 月 2 日在马尔代夫发生的求婚。"),
+        N("fertilityTests", "北京生育检查", "事件", "第四章", "包括抽血、激素六项、B 超和 AMH 等检查。"),
+        N("eggPlan", "洛杉矶取卵计划", "事件", "第一、四至六章", "围绕取卵、代孕与预产期形成的计划链。"),
+        N("demand50m", "五千万美元要求", "事件", "第一、五章", "景甜在拉古纳海滩提出的资金要求，成为关系转折点。"),
+        N("elevenSeconds", "十一秒沉默", "事件", "第五章", "孙宇晨没有立即答应要求，电话沉默十一秒。"),
+        N("departure", "景甜离开", "事件", "第五至六章", "电话之后双方关系中断，文本称之后无人再见过她。"),
+        N("aftermath", "账单与遗留物", "事件", "第六章", "玻璃赔偿、燃油、促排针、代孕定金和提醒构成的善后。")
+      ];
+
+      const rawLinks = [
+        L("sun", "jing", "爱恋、交往", "全篇", "全文的中心人物关系。"),
+        L("jing", "jingGuoqing", "父女", "第三章", "调查材料和收款账户中出现。"),
+        L("jing", "tianXinai", "母女", "第三章", "调查材料和收款账户中出现。"),
+        L("sun", "sunParents", "子女", "第四章", "景甜在香港见到孙宇晨父母。"),
+        L("sun", "assistants", "雇用、委托", "全篇", "助理承担行程、清场、付款与善后。"),
+        L("assistants", "guards", "协作", "第三章", "共同处理电影院已有观众。"),
+        L("assistants", "crew", "协调航程", "第四章", "跨洲旅行由助理协调机组与行李。"),
+        L("cleaners", "ritz", "持续维护", "第六章", "人物离开后仍继续贴遮光胶带。"),
+        L("cleaners", "laguna", "清扫空置楼层", "第一章", "登记显示有人，因此每日照常清扫。"),
+        L("jing", "oldFinance", "前合作关系", "第四章", "景甜称对方以前与她一起做财务。"),
+        L("jing", "oldFinance", "支付八万元", "第四章", "对方出狱后寻求帮助，景甜支付八万元。"),
+        L("jing", "surrogate", "计划委托生育", "第六章", "代孕机构已经确定候选人。"),
+        L("jing", "filmGroup", "影视合作", "第二章", "文本列出相关导演与演员。"),
+
+        L("sun", "pku", "就读", "第二章", "2007 年刚进入北大。"),
+        L("pku", "beijing", "位于", "第二章", "北大宿舍构成回忆场景。"),
+        L("sun", "usa", "读书、创业", "第二章", "后来在美国读书并创业。"),
+        L("sun", "hongkong", "长期活动", "第三至六章", "关系的大部分现实情节从香港展开。"),
+        L("jing", "beijing", "居住、检查", "第三至四章", "北京租房和生育检查均被提及。"),
+        L("jing", "losangeles", "前往取卵", "第四章", "2 月 28 日乘机前往洛杉矶。"),
+        L("jing", "laguna", "入住八天", "第一章", "在蒙太奇拉古纳海滩酒店居住。"),
+        L("laguna", "pacific", "面向", "第一章", "酒店位于海崖，下面是太平洋。"),
+        L("g700", "vannuys", "停放等待", "第一章", "飞机在 Van Nuys 等待。"),
+        L("victoria", "hongkong", "位于", "第四至六章", "维港是香港段落的持续背景。"),
+        L("report", "shanghai", "记录购房", "第三章", "调查材料包含上海购买的房产。"),
+        L("jing", "hainan", "春节安排", "第四章", "景甜称家里已定在海南过年。"),
+        L("sun", "delingha", "故乡联想", "第四章", "景甜提到德令哈日落，孙宇晨想到自己是青海人。"),
+
+        L("firstMeeting", "sun", "参与者", "第三章", "孙宇晨参加初次见面。"),
+        L("firstMeeting", "jing", "参与者", "第三章", "景甜参加初次见面。"),
+        L("firstMeeting", "rosewood", "发生于", "第三章", "二人在瑰丽酒店见第一面。"),
+        L("rosewood", "hongkong", "位于", "第三章", "瑰丽酒店属于香港叙事场景。"),
+        L("firstMeeting", "banana", "观看", "第三章", "见面时共同观看卡特兰的香蕉。"),
+        L("sun", "banana", "带去观看", "第三章", "孙宇晨带景甜去看作品。"),
+        L("jing", "banana", "询问价格", "第三章", "景甜询问作品价格和腐烂问题。"),
+
+        L("privateScreening", "sun", "参与者", "第三章", "孙宇晨参加私人观影。"),
+        L("privateScreening", "jing", "参与者", "第三章", "景甜提出场内不能有其他人。"),
+        L("privateScreening", "cinema", "发生于", "第三章", "助理买下电影院所有座位。"),
+        L("privateScreening", "zootopia", "放映", "第三章", "放映影片为《疯狂动物城2》。"),
+        L("assistants", "privateScreening", "执行清场", "第三章", "负责买票并补偿已购票观众。"),
+        L("guards", "privateScreening", "协助清场", "第三章", "与助理一起在影院门口处理观众。"),
+
+        L("jing", "warring", "参演", "第二章", "文本提到 2011 年拍摄《战国》。"),
+        L("jing", "greatwall", "参演", "第二章", "文本提到后续拍摄《长城》。"),
+        L("filmGroup", "warring", "参与项目", "第二章", "聚合名单中的部分人员参与《战国》。"),
+        L("filmGroup", "greatwall", "参与项目", "第二章", "聚合名单中的部分人员参与《长城》。"),
+        L("jing", "qqImage", "代言形象", "第二章", "QQ 弹窗代言图片中的人物。"),
+        L("qqImage", "qq", "来源平台", "第二章", "图片来自 QQ 弹窗。"),
+        L("sun", "qqImage", "长期保存", "第二、四、六章", "十九年间多次迁移至新设备。"),
+        L("friendRequest", "sun", "发送者", "第二章", "孙宇晨写下“你好”并发送。"),
+        L("friendRequest", "jing", "接收者、未通过", "第二章", "好友申请没有通过。"),
+        L("friendRequest", "xiaonei", "发生于", "第二章", "申请通过校内网发送。"),
+
+        L("sun", "report", "委托制作", "第三章", "认识三个月后让人制作调查材料。"),
+        L("report", "jing", "调查对象", "第三章", "材料记录景甜的项目、账户和房产。"),
+        L("report", "jingGuoqing", "记录关联", "第三章", "材料中出现景国庆。"),
+        L("report", "tianXinai", "记录关联", "第三章", "材料中出现田心爱。"),
+        L("jing", "nailFile", "使用并留下", "第三、六章", "景甜用它为孙宇晨磨指甲。"),
+        L("sun", "nailFile", "保留", "第六章", "结尾尝试使用但忘记方向。"),
+
+        L("atlanticTrip", "sun", "参与者", "第四章", "孙宇晨参与跨洲行程。"),
+        L("atlanticTrip", "jing", "发起、参与", "第四章", "景甜选择特纳里费并继续前往马尔代夫。"),
+        L("atlanticTrip", "hongkong", "起点", "第四章", "二人从香港出发。"),
+        L("atlanticTrip", "tenerife", "第一站", "第四章", "A330 首先抵达特纳里费。"),
+        L("tenerife", "atlantic", "位于海岸", "第四章", "岛屿位于非洲西北海岸外的大西洋。"),
+        L("atlanticTrip", "ritz", "入住", "第四章", "在丽兹卡尔顿住宿。"),
+        L("ritz", "tenerife", "位于", "第四章", "酒店位于特纳里费。"),
+        L("atlanticTrip", "teide", "观看日落、星空", "第四章", "二人在泰德公园停留。"),
+        L("teide", "tenerife", "位于", "第四章", "泰德公园是岛上行程点。"),
+        L("atlanticTrip", "maldives", "第二站", "第四章", "从特纳里费前往马尔代夫。"),
+        L("atlanticTrip", "soneva", "入住", "第四章", "在索尼娃贾尼停留十四天。"),
+        L("soneva", "maldives", "位于", "第四章", "索尼娃贾尼属于马尔代夫场景。"),
+        L("male", "maldives", "首都、中转", "第四章", "助理前往马累购买戒指。"),
+        L("seaplane", "male", "往返", "第四章", "助理乘水上飞机前往马累。"),
+        L("seaplane", "soneva", "运输", "第四章", "人员、行李与戒指通过水上飞机转运。"),
+        L("atlanticTrip", "a330", "使用", "第四章", "三十人乘 A330 跨洲飞行。"),
+        L("crew", "a330", "驾驶、保障", "第四章", "机组执行宽体客机航程。"),
+
+        L("bridePrice", "sun", "付款人", "第四章", "孙宇晨完成三千万元人民币转账。"),
+        L("bridePrice", "jing", "提出", "第四章", "景甜提出彩礼要求。"),
+        L("bridePrice", "jingGuoqing", "收款人", "第四章", "景国庆账户收款。"),
+        L("bridePrice", "tianXinai", "收款人", "第四章", "田心爱账户收款并回复收到。"),
+        L("proposal", "sun", "求婚者", "第四章", "孙宇晨发起求婚。"),
+        L("proposal", "jing", "被求婚者", "第四章", "景甜接受情节中的婚姻讨论。"),
+        L("proposal", "soneva", "发生于", "第四章", "2026 年 1 月 2 日发生。"),
+        L("proposal", "male", "戒指购自", "第四章", "助理当天往返马累购买戒指。"),
+
+        L("fertilityTests", "jing", "接受检查", "第四章", "抽血、激素六项、B 超和 AMH。"),
+        L("fertilityTests", "beijing", "发生于", "第四章", "相关检查都在北京进行。"),
+        L("fertilityTests", "eggPlan", "前置准备", "第四章", "用于判断卵巢储备与取卵可行性。"),
+        L("eggPlan", "jing", "计划取卵", "第一、四章", "景甜主动提出代孕生育计划。"),
+        L("eggPlan", "clinic", "计划执行方", "第一、五章", "诊所询问孩子父亲何时到场。"),
+        L("eggPlan", "agency", "代孕服务方", "第四、六章", "机构收取定金并准备候选人。"),
+        L("agency", "surrogate", "选定", "第六章", "候选人一月已准备好。"),
+        L("eggPlan", "losangeles", "计划地点", "第四章", "取卵计划在洛杉矶地区推进。"),
+        L("g700", "eggPlan", "运输", "第四章", "景甜乘 G700 前往洛杉矶。"),
+        L("g700", "losangeles", "飞往", "第四章", "2 月 28 日抵达洛杉矶地区。"),
+
+        L("demand50m", "jing", "提出者", "第一、五章", "景甜提出五千万美元要求。"),
+        L("demand50m", "sun", "被要求者", "第一、五章", "孙宇晨第一次回答“让我想想”。"),
+        L("demand50m", "laguna", "电话发出地", "第一、五章", "景甜当时在拉古纳海滩。"),
+        L("demand50m", "eggPlan", "作为条件", "第一章", "文本称没有五千万就不取卵。"),
+        L("sun", "claude", "调用分析", "第五章", "读取 API 核查现金资产。"),
+        L("claude", "demand50m", "建议不支付", "第五章", "Claude Code 给出明确否定意见。"),
+        L("demand50m", "elevenSeconds", "触发", "第五章", "第二次电话中出现十一秒沉默。"),
+        L("elevenSeconds", "sun", "沉默者", "第五章", "孙宇晨没有给出答应的回答。"),
+        L("elevenSeconds", "jing", "等待回答", "第五章", "景甜随后说“我知道了”。"),
+        L("elevenSeconds", "departure", "关系转折", "第五章", "电话后关系中断。"),
+        L("departure", "jing", "离开者", "第五至六章", "文本称之后没有人再见过她。"),
+        L("departure", "aftermath", "留下善后", "第六章", "离开后出现赔偿、账单和遗留物。"),
+        L("aftermath", "meds", "包含", "第六章", "八天促排针一支未拆。"),
+        L("clinic", "meds", "寄回", "第六章", "洛杉矶诊所寄回冷藏药物。"),
+        L("aftermath", "agency", "包含不退定金", "第六章", "二十万美元代孕定金不退。"),
+        L("aftermath", "ritz", "包含玻璃赔偿", "第六章", "遮光胶造成玻璃需要整块更换。"),
+        L("aftermath", "a330", "包含额外燃油", "第六章", "为满足配平而多加并放掉燃油。"),
+        L("jing", "house", "要求署名购买", "第四章", "要求在香港买房并写她的名字。"),
+        L("house", "hongkong", "位于", "第四章", "房产候选均位于香港。"),
+        L("assistants", "house", "持续寻找", "第四章", "助理半年间查看十几套房。")
+      ];
+
+      const endpointId = value => typeof value === "object" ? value.id : value;
+      const escapeHtml = value => String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+      const nodeById = new Map(rawNodes.map(node => [node.id, node]));
+      const degrees = new Map(rawNodes.map(node => [node.id, 0]));
+      rawLinks.forEach(link => {
+        degrees.set(endpointId(link.source), degrees.get(endpointId(link.source)) + 1);
+        degrees.set(endpointId(link.target), degrees.get(endpointId(link.target)) + 1);
+      });
+
+      const state = {
+        enabledTypes: new Set(Object.keys(TYPES)),
+        showLabels: false,
+        selectedId: null
+      };
+
+      const svg = d3.select("#graph");
+      const stage = document.querySelector(".graph-stage");
+      const tooltip = document.getElementById("tooltip");
+      const inspector = document.getElementById("inspector");
+      const labelsButton = document.getElementById("labels-button");
+      let width = stage.clientWidth;
+      let height = stage.clientHeight;
+      let simulation;
+      let currentNodes = [];
+      let currentLinks = [];
+      let nodeSelection;
+      let linkSelection;
+      let linkLabelSelection;
+
+      svg.attr("viewBox", [0, 0, width, height]);
+      const defs = svg.append("defs");
+      defs.append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 17)
+        .attr("markerWidth", 5)
+        .attr("markerHeight", 5)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("fill", "#85827a")
+        .attr("d", "M0,-5L10,0L0,5");
+
+      const viewport = svg.append("g");
+      const linksLayer = viewport.append("g");
+      const labelsLayer = viewport.append("g");
+      const nodesLayer = viewport.append("g");
+
+      const zoom = d3.zoom()
+        .scaleExtent([0.22, 4])
+        .on("zoom", event => viewport.attr("transform", event.transform));
+      svg.call(zoom);
+
+      const filterRoot = document.getElementById("filters");
+      Object.entries(TYPES).forEach(([type, config]) => {
+        const count = rawNodes.filter(node => node.type === type).length;
+        const label = document.createElement("label");
+        label.className = "filter-row";
+        label.innerHTML = '<input type="checkbox" value="' + escapeHtml(type) + '" checked>' +
+          '<i class="swatch" style="background:' + config.color + '"></i>' +
+          '<span>' + escapeHtml(type) + '</span><span>' + count + '</span>';
+        filterRoot.appendChild(label);
+      });
+
+      const options = document.getElementById("entity-options");
+      rawNodes.slice().sort((a, b) => a.label.localeCompare(b.label, "zh-CN")).forEach(node => {
+        const option = document.createElement("option");
+        option.value = node.label;
+        options.appendChild(option);
+      });
+
+      filterRoot.addEventListener("change", event => {
+        if (!event.target.matches("input")) return;
+        if (event.target.checked) state.enabledTypes.add(event.target.value);
+        else state.enabledTypes.delete(event.target.value);
+        if (state.selectedId && !state.enabledTypes.has(nodeById.get(state.selectedId).type)) {
+          state.selectedId = null;
+          showOverview();
+        }
+        buildGraph();
+        window.setTimeout(fitGraph, 700);
+      });
+
+      function radius(node) {
+        return Math.min(23, 8 + Math.sqrt(degrees.get(node.id) || 1) * 2.05);
+      }
+
+      function buildGraph() {
+        if (simulation) simulation.stop();
+        currentNodes = rawNodes
+          .filter(node => state.enabledTypes.has(node.type))
+          .map(node => ({ ...node }));
+        const visibleIds = new Set(currentNodes.map(node => node.id));
+        currentLinks = rawLinks
+          .filter(link => visibleIds.has(endpointId(link.source)) && visibleIds.has(endpointId(link.target)))
+          .map(link => ({
+            ...link,
+            source: endpointId(link.source),
+            target: endpointId(link.target)
+          }));
+
+        document.getElementById("node-count").textContent = currentNodes.length;
+        document.getElementById("link-count").textContent = currentLinks.length;
+
+        linkSelection = linksLayer.selectAll("line")
+          .data(currentLinks)
+          .join("line")
+          .attr("class", "link")
+          .attr("stroke-width", link => 0.8 + Math.min(2.2, link.relation.length / 12))
+          .attr("marker-end", "url(#arrow)")
+          .on("mouseenter", function (event, link) {
+            showTooltip(event, link.relation + " · " + link.evidence);
+          })
+          .on("mousemove", moveTooltip)
+          .on("mouseleave", hideTooltip);
+
+        linkLabelSelection = labelsLayer.selectAll("text")
+          .data(currentLinks)
+          .join("text")
+          .attr("class", "link-label")
+          .text(link => link.relation);
+
+        nodeSelection = nodesLayer.selectAll("g")
+          .data(currentNodes, node => node.id)
+          .join(enter => {
+            const group = enter.append("g").attr("class", "node");
+            group.append("circle");
+            group.append("text").attr("class", "node-label");
+            return group;
+          });
+
+        nodeSelection.select("circle")
+          .attr("r", radius)
+          .attr("fill", node => TYPES[node.type].color);
+
+        nodeSelection.select("text")
+          .attr("y", node => radius(node) + 14)
+          .text(node => node.label);
+
+        nodeSelection
+          .on("mouseenter", (event, node) => showTooltip(event, node.type + " · " + node.label))
+          .on("mousemove", moveTooltip)
+          .on("mouseleave", hideTooltip)
+          .on("click", (event, node) => {
+            event.stopPropagation();
+            selectNode(node.id, true);
+          });
+
+        simulation = d3.forceSimulation(currentNodes)
+          .force("link", d3.forceLink(currentLinks).id(node => node.id).distance(link => {
+            return link.source.type === "事件" || link.target.type === "事件" ? 78 : 105;
+          }).strength(0.52))
+          .force("charge", d3.forceManyBody().strength(node => node.id === "sun" || node.id === "jing" ? -560 : -250))
+          .force("center", d3.forceCenter(width / 2, height / 2))
+          .force("collision", d3.forceCollide().radius(node => radius(node) + 24).iterations(2))
+          .force("x", d3.forceX(width / 2).strength(0.028))
+          .force("y", d3.forceY(height / 2).strength(0.028))
+          .on("tick", ticked);
+
+        nodeSelection.call(d3.drag()
+          .on("start", (event, node) => {
+            if (!event.active) simulation.alphaTarget(0.22).restart();
+            node.fx = node.x;
+            node.fy = node.y;
+          })
+          .on("drag", (event, node) => {
+            node.fx = event.x;
+            node.fy = event.y;
+          })
+          .on("end", (event, node) => {
+            if (!event.active) simulation.alphaTarget(0);
+            node.fx = null;
+            node.fy = null;
+          }));
+
+        applySelection();
+      }
+
+      function ticked() {
+        linkSelection
+          .attr("x1", link => link.source.x)
+          .attr("y1", link => link.source.y)
+          .attr("x2", link => link.target.x)
+          .attr("y2", link => link.target.y);
+        linkLabelSelection
+          .attr("x", link => (link.source.x + link.target.x) / 2)
+          .attr("y", link => (link.source.y + link.target.y) / 2 - 4);
+        nodeSelection.attr("transform", node => "translate(" + node.x + "," + node.y + ")");
+      }
+
+      function selectNode(id, center) {
+        state.selectedId = id;
+        applySelection();
+        renderInspector(nodeById.get(id));
+        if (center) {
+          const node = currentNodes.find(item => item.id === id);
+          if (node) centerNode(node);
+        }
+      }
+
+      function applySelection() {
+        const selected = state.selectedId;
+        const related = new Set(selected ? [selected] : []);
+        if (selected) {
+          currentLinks.forEach(link => {
+            const source = endpointId(link.source);
+            const target = endpointId(link.target);
+            if (source === selected) related.add(target);
+            if (target === selected) related.add(source);
+          });
+        }
+
+        if (nodeSelection) {
+          nodeSelection
+            .classed("is-muted", node => Boolean(selected) && !related.has(node.id))
+            .classed("is-active", node => node.id === selected);
+        }
+        if (linkSelection) {
+          linkSelection
+            .classed("is-muted", link => Boolean(selected) &&
+              endpointId(link.source) !== selected && endpointId(link.target) !== selected)
+            .classed("is-active", link => Boolean(selected) &&
+              (endpointId(link.source) === selected || endpointId(link.target) === selected));
+        }
+        if (linkLabelSelection) {
+          linkLabelSelection.classed("is-visible", link => state.showLabels || Boolean(selected) &&
+            (endpointId(link.source) === selected || endpointId(link.target) === selected));
+        }
+      }
+
+      function renderInspector(node) {
+        const relations = rawLinks.filter(link =>
+          endpointId(link.source) === node.id || endpointId(link.target) === node.id
+        );
+        const relationHtml = relations.map(link => {
+          const sourceId = endpointId(link.source);
+          const targetId = endpointId(link.target);
+          const otherId = sourceId === node.id ? targetId : sourceId;
+          const other = nodeById.get(otherId);
+          const direction = sourceId === node.id
+            ? node.label + " → " + other.label
+            : other.label + " → " + node.label;
+          return '<button class="relation-button" type="button" data-node="' + escapeHtml(otherId) + '">' +
+            '<strong>' + escapeHtml(direction) + ' · ' + escapeHtml(link.relation) + '</strong>' +
+            '<span>' + escapeHtml(link.chapter) + '｜' + escapeHtml(link.evidence) + '</span></button>';
+        }).join("");
+
+        inspector.innerHTML =
+          '<p class="inspector-kicker">' + escapeHtml(node.type) + '</p>' +
+          '<h2>' + escapeHtml(node.label) + '</h2>' +
+          '<p class="summary">' + escapeHtml(node.summary) + '</p>' +
+          '<div class="meta-line"><span>' + escapeHtml(node.chapter) + '</span><strong>' +
+          relations.length + ' 条直接关系</strong></div>' +
+          '<div class="relations">' + relationHtml + '</div>';
+
+        inspector.querySelectorAll("[data-node]").forEach(button => {
+          button.addEventListener("click", () => {
+            const target = nodeById.get(button.dataset.node);
+            if (!state.enabledTypes.has(target.type)) {
+              state.enabledTypes.add(target.type);
+              const checkbox = filterRoot.querySelector('input[value="' + CSS.escape(target.type) + '"]');
+              if (checkbox) checkbox.checked = true;
+              buildGraph();
+            }
+            window.setTimeout(() => selectNode(target.id, true), 60);
+          });
+        });
+      }
+
+      function showOverview() {
+        inspector.innerHTML =
+          '<p class="inspector-kicker">图谱概览</p>' +
+          '<h2>叙事关系总览</h2>' +
+          '<p class="summary">图谱以孙宇晨与景甜为双中心，把人物关系、跨洲移动、资金行为、医疗计划和记忆物件连接在同一网络中。</p>' +
+          '<div class="meta-line"><span>分析对象</span><strong>虚构文本</strong></div>' +
+          '<ul class="overview-list"><li>红色：人物</li><li>绿色：地点</li><li>蓝色：机构</li>' +
+          '<li>金色：作品与物件</li><li>紫色：关键事件</li></ul>';
+      }
+
+      function centerNode(node) {
+        const scale = 1.45;
+        const transform = d3.zoomIdentity
+          .translate(width / 2 - node.x * scale, height / 2 - node.y * scale)
+          .scale(scale);
+        svg.transition().duration(420).call(zoom.transform, transform);
+      }
+
+      function fitGraph() {
+        if (!currentNodes.length || currentNodes.some(node => !Number.isFinite(node.x))) return;
+        const xExtent = d3.extent(currentNodes, node => node.x);
+        const yExtent = d3.extent(currentNodes, node => node.y);
+        const graphWidth = Math.max(1, xExtent[1] - xExtent[0] + 100);
+        const graphHeight = Math.max(1, yExtent[1] - yExtent[0] + 100);
+        const scale = Math.max(0.22, Math.min(1.35, 0.9 / Math.max(graphWidth / width, graphHeight / height)));
+        const centerX = (xExtent[0] + xExtent[1]) / 2;
+        const centerY = (yExtent[0] + yExtent[1]) / 2;
+        const transform = d3.zoomIdentity
+          .translate(width / 2 - centerX * scale, height / 2 - centerY * scale)
+          .scale(scale);
+        svg.transition().duration(520).call(zoom.transform, transform);
+      }
+
+      function showTooltip(event, text) {
+        tooltip.textContent = text;
+        tooltip.classList.add("visible");
+        moveTooltip(event);
+      }
+
+      function moveTooltip(event) {
+        tooltip.style.left = event.clientX + "px";
+        tooltip.style.top = event.clientY + "px";
+      }
+
+      function hideTooltip() {
+        tooltip.classList.remove("visible");
+      }
+
+      document.getElementById("fit-button").addEventListener("click", fitGraph);
+      labelsButton.addEventListener("click", () => {
+        state.showLabels = !state.showLabels;
+        labelsButton.classList.toggle("active", state.showLabels);
+        labelsButton.setAttribute("aria-pressed", String(state.showLabels));
+        applySelection();
+      });
+
+      const searchInput = document.getElementById("entity-search");
+      function runSearch() {
+        const query = searchInput.value.trim().toLocaleLowerCase("zh-CN");
+        if (!query) return;
+        const match = rawNodes.find(node => node.label.toLocaleLowerCase("zh-CN") === query) ||
+          rawNodes.find(node => node.label.toLocaleLowerCase("zh-CN").includes(query));
+        if (!match) {
+          searchInput.setCustomValidity("没有找到该实体");
+          searchInput.reportValidity();
+          return;
+        }
+        searchInput.setCustomValidity("");
+        if (!state.enabledTypes.has(match.type)) {
+          state.enabledTypes.add(match.type);
+          const checkbox = filterRoot.querySelector('input[value="' + CSS.escape(match.type) + '"]');
+          if (checkbox) checkbox.checked = true;
+          buildGraph();
+        }
+        window.setTimeout(() => selectNode(match.id, true), 60);
+      }
+      searchInput.addEventListener("change", runSearch);
+      searchInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") runSearch();
+        if (event.key === "Escape") {
+          searchInput.value = "";
+          searchInput.setCustomValidity("");
+          state.selectedId = null;
+          applySelection();
+          showOverview();
+        }
+      });
+
+      svg.on("click", event => {
+        if (event.target !== svg.node()) return;
+        state.selectedId = null;
+        applySelection();
+        showOverview();
+      });
+
+      const observer = new ResizeObserver(() => {
+        width = stage.clientWidth;
+        height = stage.clientHeight;
+        svg.attr("viewBox", [0, 0, width, height]);
+        if (simulation) {
+          simulation.force("center", d3.forceCenter(width / 2, height / 2));
+          simulation.alpha(0.2).restart();
+        }
+      });
+      observer.observe(stage);
+
+      buildGraph();
+      window.setTimeout(fitGraph, 1200);
+    }());
+  </script>
+</body>
+</html>
